@@ -1,0 +1,1928 @@
+openapi: 3.0.3
+info:
+  title: API de Controle de Manutenção Industrial
+  version: 1.0.0
+  description: API RESTful para gerenciamento de equipamentos, ordens de serviço,
+    defeitos, manutenções preventivas e peças substituídas. Projeto NP1 - Desenvolvimento
+    Web Back-End.
+paths:
+  /api/alertas/:
+    get:
+      operationId: alertas_retrieve
+      description: 'Resumo: manutenções vencidas, defeitos críticos e equipamentos
+        em manutenção.'
+      summary: Painel de alertas
+      tags:
+      - alertas
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alertas'
+          description: ''
+  /api/defeitos/:
+    get:
+      operationId: defeitos_list
+      description: 'Problema 5: por padrão os CRÍTICOS aparecem primeiro. Filtros:
+        `?severidade=`, `?equipamento=`.'
+      summary: Listar defeitos (ordenados por prioridade)
+      parameters:
+      - in: query
+        name: equipamento
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: Um termo de busca.
+        schema:
+          type: string
+      - in: query
+        name: severidade
+        schema:
+          type: string
+          enum:
+          - ALTO
+          - BAIXO
+          - CRITICO
+          - MEDIO
+        description: |-
+          * `BAIXO` - Baixo
+          * `MEDIO` - Médio
+          * `ALTO` - Alto
+          * `CRITICO` - Crítico
+      tags:
+      - defeitos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Defeito'
+          description: ''
+    post:
+      operationId: defeitos_create
+      description: Defeito CRÍTICO retorna campo `alerta` preenchido.
+      summary: Registrar defeito
+      tags:
+      - defeitos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DefeitoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DefeitoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DefeitoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Defeito'
+          description: ''
+  /api/defeitos/{id}/:
+    get:
+      operationId: defeitos_retrieve
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Detalhar defeito
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este defeito.
+        required: true
+      tags:
+      - defeitos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Defeito'
+          description: ''
+    put:
+      operationId: defeitos_update
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Atualizar defeito
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este defeito.
+        required: true
+      tags:
+      - defeitos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DefeitoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DefeitoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DefeitoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Defeito'
+          description: ''
+    patch:
+      operationId: defeitos_partial_update
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Atualizar defeito (parcial)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este defeito.
+        required: true
+      tags:
+      - defeitos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDefeitoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDefeitoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDefeitoRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Defeito'
+          description: ''
+    delete:
+      operationId: defeitos_destroy
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Excluir defeito
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este defeito.
+        required: true
+      tags:
+      - defeitos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/defeitos/criticos/:
+    get:
+      operationId: defeitos_criticos_list
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Defeitos críticos
+      parameters:
+      - in: query
+        name: equipamento
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: Um termo de busca.
+        schema:
+          type: string
+      - in: query
+        name: severidade
+        schema:
+          type: string
+          enum:
+          - ALTO
+          - BAIXO
+          - CRITICO
+          - MEDIO
+        description: |-
+          * `BAIXO` - Baixo
+          * `MEDIO` - Médio
+          * `ALTO` - Alto
+          * `CRITICO` - Crítico
+      tags:
+      - defeitos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Defeito'
+          description: ''
+  /api/equipamentos/:
+    get:
+      operationId: equipamentos_list
+      description: 'Filtros: `?status=EM_MANUTENCAO`, `?fabricante=`, `?search=`.'
+      summary: Listar equipamentos
+      parameters:
+      - in: query
+        name: fabricante
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: Um termo de busca.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ATIVO
+          - EM_MANUTENCAO
+          - INATIVO
+        description: |-
+          * `ATIVO` - Ativo
+          * `EM_MANUTENCAO` - Em manutenção
+          * `INATIVO` - Inativo
+      tags:
+      - equipamentos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Equipamento'
+          description: ''
+    post:
+      operationId: equipamentos_create
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Cadastrar equipamento
+      tags:
+      - equipamentos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipamentoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EquipamentoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EquipamentoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipamento'
+          description: ''
+  /api/equipamentos/{id}/:
+    get:
+      operationId: equipamentos_retrieve
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Detalhar equipamento
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este equipamento.
+        required: true
+      tags:
+      - equipamentos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipamento'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+          description: ID inválido ou dados inválidos
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+          description: Recurso não encontrado
+    put:
+      operationId: equipamentos_update
+      description: 'Problema 1: corrigir cadastro incorreto.'
+      summary: Atualizar equipamento (completo)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este equipamento.
+        required: true
+      tags:
+      - equipamentos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipamentoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EquipamentoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EquipamentoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipamento'
+          description: ''
+    patch:
+      operationId: equipamentos_partial_update
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Atualizar equipamento (parcial)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este equipamento.
+        required: true
+      tags:
+      - equipamentos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipamentoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipamentoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipamentoRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipamento'
+          description: ''
+    delete:
+      operationId: equipamentos_destroy
+      description: 'Problema 6: retorna **409** se houver OS ou defeitos vinculados.'
+      summary: Excluir equipamento
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este equipamento.
+        required: true
+      tags:
+      - equipamentos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+          description: Possui vínculos
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+          description: ID inválido ou dados inválidos
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+          description: Recurso não encontrado
+  /api/equipamentos/{id}/historico/:
+    get:
+      operationId: equipamentos_historico_retrieve
+      description: Ordens de serviço, defeitos e planos preventivos do equipamento.
+      summary: Histórico completo do equipamento
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este equipamento.
+        required: true
+      tags:
+      - equipamentos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipamento'
+          description: ''
+  /api/equipamentos/em-manutencao/:
+    get:
+      operationId: equipamentos_em_manutencao_list
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Equipamentos em manutenção (Problema 7)
+      parameters:
+      - in: query
+        name: fabricante
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: Um termo de busca.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ATIVO
+          - EM_MANUTENCAO
+          - INATIVO
+        description: |-
+          * `ATIVO` - Ativo
+          * `EM_MANUTENCAO` - Em manutenção
+          * `INATIVO` - Inativo
+      tags:
+      - equipamentos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Equipamento'
+          description: ''
+  /api/manutencoes-preventivas/:
+    get:
+      operationId: manutencoes_preventivas_list
+      description: 'Filtro: `?vencida=true`.'
+      summary: Listar planos de manutenção preventiva
+      parameters:
+      - in: query
+        name: equipamento
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: Um termo de busca.
+        schema:
+          type: string
+      - in: query
+        name: vencida
+        schema:
+          type: boolean
+        description: Somente vencidas (true/false)
+      tags:
+      - manutencoes-preventivas
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManutencaoPreventiva'
+          description: ''
+    post:
+      operationId: manutencoes_preventivas_create
+      description: '`proxima_manutencao` é calculada automaticamente se omitida.'
+      summary: Cadastrar plano preventivo
+      tags:
+      - manutencoes-preventivas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManutencaoPreventivaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ManutencaoPreventivaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ManutencaoPreventivaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManutencaoPreventiva'
+          description: ''
+  /api/manutencoes-preventivas/{id}/:
+    get:
+      operationId: manutencoes_preventivas_retrieve
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Detalhar plano preventivo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este manutenção preventiva.
+        required: true
+      tags:
+      - manutencoes-preventivas
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManutencaoPreventiva'
+          description: ''
+    put:
+      operationId: manutencoes_preventivas_update
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Atualizar plano preventivo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este manutenção preventiva.
+        required: true
+      tags:
+      - manutencoes-preventivas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManutencaoPreventivaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ManutencaoPreventivaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ManutencaoPreventivaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManutencaoPreventiva'
+          description: ''
+    patch:
+      operationId: manutencoes_preventivas_partial_update
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Atualizar plano preventivo (parcial)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este manutenção preventiva.
+        required: true
+      tags:
+      - manutencoes-preventivas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedManutencaoPreventivaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedManutencaoPreventivaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedManutencaoPreventivaRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManutencaoPreventiva'
+          description: ''
+    delete:
+      operationId: manutencoes_preventivas_destroy
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Excluir plano preventivo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este manutenção preventiva.
+        required: true
+      tags:
+      - manutencoes-preventivas
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/manutencoes-preventivas/{id}/registrar-execucao/:
+    post:
+      operationId: manutencoes_preventivas_registrar_execucao_create
+      description: 'Atualiza `ultima_manutencao` (padrão: hoje) e recalcula `proxima_manutencao`.'
+      summary: Registrar execução da preventiva
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este manutenção preventiva.
+        required: true
+      tags:
+      - manutencoes-preventivas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrarExecucaoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegistrarExecucaoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegistrarExecucaoRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManutencaoPreventiva'
+          description: ''
+  /api/manutencoes-preventivas/vencidas/:
+    get:
+      operationId: manutencoes_preventivas_vencidas_list
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Alertas de manutenções vencidas (Problema 3)
+      parameters:
+      - in: query
+        name: equipamento
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: Um termo de busca.
+        schema:
+          type: string
+      - in: query
+        name: vencida
+        schema:
+          type: boolean
+        description: Somente vencidas (true/false)
+      tags:
+      - manutencoes-preventivas
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManutencaoPreventiva'
+          description: ''
+  /api/ordens-servico/:
+    get:
+      operationId: ordens_servico_list
+      description: 'Filtros: `?status=`, `?tipo=`, `?equipamento=`.'
+      summary: Listar ordens de serviço
+      parameters:
+      - in: query
+        name: equipamento
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - in: query
+        name: responsavel
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: Um termo de busca.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ABERTA
+          - EM_ANDAMENTO
+          - FINALIZADA
+        description: |-
+          * `ABERTA` - Aberta
+          * `EM_ANDAMENTO` - Em andamento
+          * `FINALIZADA` - Finalizada
+      - in: query
+        name: tipo
+        schema:
+          type: string
+          enum:
+          - CORRETIVA
+          - PREVENTIVA
+        description: |-
+          * `PREVENTIVA` - Preventiva
+          * `CORRETIVA` - Corretiva
+      tags:
+      - ordens-servico
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrdemServico'
+          description: ''
+    post:
+      operationId: ordens_servico_create
+      description: 'Problema 2: retorna **400** se o equipamento não existir. O equipamento
+        passa automaticamente para EM_MANUTENCAO.'
+      summary: Abrir ordem de serviço
+      tags:
+      - ordens-servico
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrdemServicoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrdemServicoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrdemServicoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServico'
+          description: ''
+  /api/ordens-servico/{id}/:
+    get:
+      operationId: ordens_servico_retrieve
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Detalhar ordem de serviço (inclui peças e custo total)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este ordem de serviço.
+        required: true
+      tags:
+      - ordens-servico
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServico'
+          description: ''
+    put:
+      operationId: ordens_servico_update
+      description: Retorna **409** se a OS já estiver finalizada.
+      summary: Atualizar ordem de serviço
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este ordem de serviço.
+        required: true
+      tags:
+      - ordens-servico
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrdemServicoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrdemServicoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrdemServicoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServico'
+          description: ''
+    patch:
+      operationId: ordens_servico_partial_update
+      description: Retorna **409** se a OS já estiver finalizada.
+      summary: Atualizar ordem de serviço (parcial)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este ordem de serviço.
+        required: true
+      tags:
+      - ordens-servico
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrdemServicoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOrdemServicoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOrdemServicoRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServico'
+          description: ''
+    delete:
+      operationId: ordens_servico_destroy
+      description: Retorna **409** se a OS já estiver finalizada.
+      summary: Excluir ordem de serviço
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este ordem de serviço.
+        required: true
+      tags:
+      - ordens-servico
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/ordens-servico/{id}/custo-total/:
+    get:
+      operationId: ordens_servico_custo_total_retrieve
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Custo total de peças da OS (Problema 8)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este ordem de serviço.
+        required: true
+      tags:
+      - ordens-servico
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustoTotal'
+          description: ''
+  /api/ordens-servico/{id}/finalizar/:
+    post:
+      operationId: ordens_servico_finalizar_create
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Finalizar ordem de serviço
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este ordem de serviço.
+        required: true
+      tags:
+      - ordens-servico
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinalizarOrdemRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FinalizarOrdemRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FinalizarOrdemRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServico'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+          description: OS já finalizada
+  /api/pecas/:
+    get:
+      operationId: pecas_list
+      description: 'Filtros: `?codigo=`, `?nome=`, `?ordem_servico=`, `?equipamento=`,
+        `?ano=`.'
+      summary: Listar peças substituídas
+      parameters:
+      - in: query
+        name: ano
+        schema:
+          type: number
+      - in: query
+        name: codigo
+        schema:
+          type: string
+      - in: query
+        name: equipamento
+        schema:
+          type: integer
+      - in: query
+        name: nome
+        schema:
+          type: string
+      - in: query
+        name: ordem_servico
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: Um termo de busca.
+        schema:
+          type: string
+      tags:
+      - pecas
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PecaSubstituida'
+          description: ''
+    post:
+      operationId: pecas_create
+      description: Retorna **400** se a OS estiver finalizada.
+      summary: Registrar peça substituída
+      tags:
+      - pecas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PecaSubstituidaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PecaSubstituidaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PecaSubstituidaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaSubstituida'
+          description: ''
+  /api/pecas/{id}/:
+    get:
+      operationId: pecas_retrieve
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Detalhar peça substituída
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este peça substituída.
+        required: true
+      tags:
+      - pecas
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaSubstituida'
+          description: ''
+    put:
+      operationId: pecas_update
+      description: Retorna **409** se a OS estiver finalizada.
+      summary: Atualizar peça substituída
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este peça substituída.
+        required: true
+      tags:
+      - pecas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PecaSubstituidaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PecaSubstituidaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PecaSubstituidaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaSubstituida'
+          description: ''
+    patch:
+      operationId: pecas_partial_update
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Atualizar peça substituída (parcial)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este peça substituída.
+        required: true
+      tags:
+      - pecas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPecaSubstituidaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPecaSubstituidaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPecaSubstituidaRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaSubstituida'
+          description: ''
+    delete:
+      operationId: pecas_destroy
+      description: Retorna **409** se a OS estiver finalizada.
+      summary: Excluir peça substituída
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este peça substituída.
+        required: true
+      tags:
+      - pecas
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/pecas/historico/:
+    get:
+      operationId: pecas_historico_retrieve
+      description: CRUD padrão com tratamento de 'ID inválido' (400) e 'não encontrado'
+        (404).
+      summary: Histórico de substituições de uma peça (Problema 4)
+      parameters:
+      - in: query
+        name: ano
+        schema:
+          type: integer
+        description: 'Ano de referência (padrão: ano atual)'
+      - in: query
+        name: codigo
+        schema:
+          type: string
+        description: 'Código da peça (ex.: ROL-6205)'
+        required: true
+      tags:
+      - pecas
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaSubstituida'
+          description: ''
+components:
+  schemas:
+    Alertas:
+      type: object
+      properties:
+        gerado_em:
+          type: string
+          format: date-time
+        totais:
+          type: object
+          additionalProperties:
+            type: integer
+        manutencoes_vencidas:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManutencaoPreventiva'
+        defeitos_criticos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Defeito'
+        equipamentos_em_manutencao:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipamento'
+      required:
+      - defeitos_criticos
+      - equipamentos_em_manutencao
+      - gerado_em
+      - manutencoes_vencidas
+      - totais
+    CustoTotal:
+      type: object
+      properties:
+        ordem_servico:
+          type: integer
+        equipamento:
+          type: string
+        quantidade_itens:
+          type: integer
+        quantidade_pecas:
+          type: integer
+        custo_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        itens:
+          type: array
+          items:
+            $ref: '#/components/schemas/PecaSubstituida'
+      required:
+      - custo_total
+      - equipamento
+      - itens
+      - ordem_servico
+      - quantidade_itens
+      - quantidade_pecas
+    Defeito:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        equipamento:
+          type: integer
+        equipamento_nome:
+          type: string
+          readOnly: true
+        descricao:
+          type: string
+        severidade:
+          $ref: '#/components/schemas/SeveridadeEnum'
+        severidade_display:
+          type: string
+          readOnly: true
+        prioridade:
+          type: integer
+          readOnly: true
+          description: 1 = Crítico (mais urgente) ... 4 = Baixo
+        critico:
+          type: boolean
+          readOnly: true
+        alerta:
+          type: string
+          nullable: true
+          readOnly: true
+        data_registro:
+          type: string
+          format: date
+      required:
+      - alerta
+      - critico
+      - descricao
+      - equipamento
+      - equipamento_nome
+      - id
+      - prioridade
+      - severidade
+      - severidade_display
+    DefeitoRequest:
+      type: object
+      properties:
+        equipamento:
+          type: integer
+        descricao:
+          type: string
+          minLength: 1
+        severidade:
+          $ref: '#/components/schemas/SeveridadeEnum'
+        data_registro:
+          type: string
+          format: date
+      required:
+      - descricao
+      - equipamento
+      - severidade
+    Equipamento:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nome:
+          type: string
+          maxLength: 120
+        modelo:
+          type: string
+          maxLength: 80
+        fabricante:
+          type: string
+          maxLength: 80
+        data_instalacao:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/StatusEquipamentoEnum'
+        status_display:
+          type: string
+          readOnly: true
+      required:
+      - data_instalacao
+      - fabricante
+      - id
+      - modelo
+      - nome
+      - status_display
+    EquipamentoRequest:
+      type: object
+      properties:
+        nome:
+          type: string
+          minLength: 1
+          maxLength: 120
+        modelo:
+          type: string
+          minLength: 1
+          maxLength: 80
+        fabricante:
+          type: string
+          minLength: 1
+          maxLength: 80
+        data_instalacao:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/StatusEquipamentoEnum'
+      required:
+      - data_instalacao
+      - fabricante
+      - modelo
+      - nome
+    Erro:
+      type: object
+      properties:
+        erro:
+          type: string
+        status:
+          type: integer
+        detalhes:
+          type: object
+          additionalProperties: {}
+      required:
+      - erro
+      - status
+    FinalizarOrdemRequest:
+      type: object
+      properties:
+        data_conclusao:
+          type: string
+          format: date
+    ManutencaoPreventiva:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        equipamento:
+          type: integer
+        equipamento_nome:
+          type: string
+          readOnly: true
+        descricao:
+          type: string
+          maxLength: 200
+        periodicidade_dias:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        ultima_manutencao:
+          type: string
+          format: date
+        proxima_manutencao:
+          type: string
+          format: date
+          description: 'Se omitida, é calculada: última manutenção + periodicidade.'
+        vencida:
+          type: boolean
+          readOnly: true
+        dias_em_atraso:
+          type: integer
+          readOnly: true
+        alerta:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - alerta
+      - descricao
+      - dias_em_atraso
+      - equipamento
+      - equipamento_nome
+      - id
+      - periodicidade_dias
+      - ultima_manutencao
+      - vencida
+    ManutencaoPreventivaRequest:
+      type: object
+      properties:
+        equipamento:
+          type: integer
+        descricao:
+          type: string
+          minLength: 1
+          maxLength: 200
+        periodicidade_dias:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        ultima_manutencao:
+          type: string
+          format: date
+        proxima_manutencao:
+          type: string
+          format: date
+          description: 'Se omitida, é calculada: última manutenção + periodicidade.'
+      required:
+      - descricao
+      - equipamento
+      - periodicidade_dias
+      - ultima_manutencao
+    OrdemServico:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        equipamento:
+          type: integer
+        equipamento_nome:
+          type: string
+          readOnly: true
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        tipo_display:
+          type: string
+          readOnly: true
+        descricao:
+          type: string
+        data_abertura:
+          type: string
+          format: date
+        data_conclusao:
+          type: string
+          format: date
+          nullable: true
+        responsavel:
+          type: string
+          maxLength: 120
+        status:
+          $ref: '#/components/schemas/StatusOrdemServicoEnum'
+        status_display:
+          type: string
+          readOnly: true
+        manutencao_preventiva:
+          type: integer
+          nullable: true
+        custo_total_pecas:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          readOnly: true
+        pecas:
+          type: array
+          items:
+            $ref: '#/components/schemas/PecaSubstituida'
+          readOnly: true
+      required:
+      - custo_total_pecas
+      - equipamento
+      - equipamento_nome
+      - id
+      - pecas
+      - responsavel
+      - status_display
+      - tipo
+      - tipo_display
+    OrdemServicoRequest:
+      type: object
+      properties:
+        equipamento:
+          type: integer
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        descricao:
+          type: string
+        data_abertura:
+          type: string
+          format: date
+        data_conclusao:
+          type: string
+          format: date
+          nullable: true
+        responsavel:
+          type: string
+          minLength: 1
+          maxLength: 120
+        status:
+          $ref: '#/components/schemas/StatusOrdemServicoEnum'
+        manutencao_preventiva:
+          type: integer
+          nullable: true
+      required:
+      - equipamento
+      - responsavel
+      - tipo
+    PatchedDefeitoRequest:
+      type: object
+      properties:
+        equipamento:
+          type: integer
+        descricao:
+          type: string
+          minLength: 1
+        severidade:
+          $ref: '#/components/schemas/SeveridadeEnum'
+        data_registro:
+          type: string
+          format: date
+    PatchedEquipamentoRequest:
+      type: object
+      properties:
+        nome:
+          type: string
+          minLength: 1
+          maxLength: 120
+        modelo:
+          type: string
+          minLength: 1
+          maxLength: 80
+        fabricante:
+          type: string
+          minLength: 1
+          maxLength: 80
+        data_instalacao:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/StatusEquipamentoEnum'
+    PatchedManutencaoPreventivaRequest:
+      type: object
+      properties:
+        equipamento:
+          type: integer
+        descricao:
+          type: string
+          minLength: 1
+          maxLength: 200
+        periodicidade_dias:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        ultima_manutencao:
+          type: string
+          format: date
+        proxima_manutencao:
+          type: string
+          format: date
+          description: 'Se omitida, é calculada: última manutenção + periodicidade.'
+    PatchedOrdemServicoRequest:
+      type: object
+      properties:
+        equipamento:
+          type: integer
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        descricao:
+          type: string
+        data_abertura:
+          type: string
+          format: date
+        data_conclusao:
+          type: string
+          format: date
+          nullable: true
+        responsavel:
+          type: string
+          minLength: 1
+          maxLength: 120
+        status:
+          $ref: '#/components/schemas/StatusOrdemServicoEnum'
+        manutencao_preventiva:
+          type: integer
+          nullable: true
+    PatchedPecaSubstituidaRequest:
+      type: object
+      properties:
+        ordem_servico:
+          type: integer
+        nome:
+          type: string
+          minLength: 1
+          maxLength: 120
+        codigo:
+          type: string
+          minLength: 1
+          maxLength: 40
+        quantidade:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        custo_unitario:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+    PecaSubstituida:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ordem_servico:
+          type: integer
+        nome:
+          type: string
+          maxLength: 120
+        codigo:
+          type: string
+          maxLength: 40
+        quantidade:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        custo_unitario:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          readOnly: true
+      required:
+      - codigo
+      - custo_unitario
+      - id
+      - nome
+      - ordem_servico
+      - quantidade
+      - subtotal
+    PecaSubstituidaRequest:
+      type: object
+      properties:
+        ordem_servico:
+          type: integer
+        nome:
+          type: string
+          minLength: 1
+          maxLength: 120
+        codigo:
+          type: string
+          minLength: 1
+          maxLength: 40
+        quantidade:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        custo_unitario:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - codigo
+      - custo_unitario
+      - nome
+      - ordem_servico
+      - quantidade
+    RegistrarExecucaoRequest:
+      type: object
+      properties:
+        data:
+          type: string
+          format: date
+    SeveridadeEnum:
+      enum:
+      - BAIXO
+      - MEDIO
+      - ALTO
+      - CRITICO
+      type: string
+      description: |-
+        * `BAIXO` - Baixo
+        * `MEDIO` - Médio
+        * `ALTO` - Alto
+        * `CRITICO` - Crítico
+    StatusEquipamentoEnum:
+      enum:
+      - ATIVO
+      - EM_MANUTENCAO
+      - INATIVO
+      type: string
+      description: |-
+        * `ATIVO` - Ativo
+        * `EM_MANUTENCAO` - Em manutenção
+        * `INATIVO` - Inativo
+    StatusOrdemServicoEnum:
+      enum:
+      - ABERTA
+      - EM_ANDAMENTO
+      - FINALIZADA
+      type: string
+      description: |-
+        * `ABERTA` - Aberta
+        * `EM_ANDAMENTO` - Em andamento
+        * `FINALIZADA` - Finalizada
+    TipoEnum:
+      enum:
+      - PREVENTIVA
+      - CORRETIVA
+      type: string
+      description: |-
+        * `PREVENTIVA` - Preventiva
+        * `CORRETIVA` - Corretiva
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
